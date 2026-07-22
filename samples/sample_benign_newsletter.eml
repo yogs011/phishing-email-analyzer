@@ -1,0 +1,21 @@
+Received: from mail-relay.github.com (140.82.112.4) by mailserver.corp.local (10.0.0.5) with SMTP id e5f6g7h8; Tue, 27 Oct 2026 10:15:00 +0530
+Authentication-Results: mailserver.corp.local; dkim=pass header.i=@github.com; spf=pass (mailserver.corp.local: domain of notifications@github.com designates 140.82.112.4 as permitted sender) smtp.mailfrom=notifications@github.com; dmarc=pass
+Received-SPF: pass (notifications@github.com designates 140.82.112.4 as permitted sender)
+From: "GitHub Security Advisories" <notifications@github.com>
+Return-Path: <notifications@github.com>
+To: <yogesh.birla@techmail.com>
+Subject: GitHub Security Advisory Weekly Digest
+Date: Tue, 27 Oct 2026 10:14:55 +0530
+Message-ID: <digest.20261027@github.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+
+Hello Yogesh,
+
+Here is your weekly summary of GitHub Security Advisories for the open-source repositories you track.
+
+Read more at:
+https://github.com/advisories
+
+Thanks,
+The GitHub Team

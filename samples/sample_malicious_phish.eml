@@ -1,0 +1,37 @@
+Received: from mail-attacker.evilcorp.com (198.51.100.45) by mailserver.corp.local (10.0.0.5) with SMTP id a1b2c3d4; Tue, 27 Oct 2026 14:22:10 +0530
+Authentication-Results: mailserver.corp.local; dkim=fail (bad signature); spf=fail (mailserver.corp.local: domain of account-security@microsoft-verify.support does not designate 198.51.100.45 as permitted sender) smtp.mailfrom=attacker@evilcorp.com; dmarc=fail action=quarantine
+Received-SPF: fail (domain of account-security@microsoft-verify.support does not designate 198.51.100.45 as permitted sender)
+From: "Microsoft 365 Security Team" <account-security@microsoft-verify.support>
+Return-Path: <bounce-collector@evilcorp.com>
+Reply-To: <credentials-harvest@198.51.100.45>
+To: <target.employee@enterprise.com>
+Subject: CRITICAL: Immediate Password Reset Required within 24 Hours
+Date: Tue, 27 Oct 2026 14:21:45 +0530
+Message-ID: <20261027142145.98765.alert@microsoft-verify.support>
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="----=_Part_Phish_12345"
+
+------=_Part_Phish_12345
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
+Dear User,
+
+Your Microsoft 365 password has expired. You are required to verify your credentials immediately to avoid suspension of corporate email services.
+
+Please click the secure portal below to authenticate:
+http://198.51.100.45/portal/login?id=83921
+
+Alternatively, review the attached document for compliance instructions.
+
+Sincerely,
+Office 365 Security Operations
+------=_Part_Phish_12345
+Content-Type: application/octet-stream; name="Urgent_Security_Patch.exe"
+Content-Disposition: attachment; filename="Urgent_Security_Patch.exe"
+Content-Transfer-Encoding: base64
+
+TVqQAAMAAAAEAAAA//8AALgAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAyAAAAA4fug4AtAnNIbgBTM0hVGhpcyBwcm9ncmFtIGNhbm5vdCBiZSBydW4gaW4gRE9TIG1v
+ZGUuDQ0KJAAAAAAAAABQRQAATAEDAAAAAA==
+------=_Part_Phish_12345--
