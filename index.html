@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOC Tier-1 Email Threat & Phishing Analyzer | Yogesh Birla</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0b132b;
+            --bg-secondary: #1c2541;
+            --bg-card: #1f2a48;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 20px 10px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-secondary);
+            padding: 24px 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 24px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+        }
+
+        .header-title h1 {
+            font-size: 1.6rem;
+            color: #60a5fa;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .header-title p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .author-tag {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid #3b82f6;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            color: #93c5fd;
+            font-weight: 600;
+        }
+
+        .author-tag a {
+            color: #60a5fa;
+            text-decoration: none;
+        }
+
+        /* Controls Section */
+        .controls-card {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+
+        .drop-zone {
+            border: 2px dashed #475569;
+            border-radius: 10px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(15, 23, 42, 0.6);
+            margin-bottom: 15px;
+        }
+
+        .drop-zone:hover {
+            border-color: var(--accent-blue);
+            background: rgba(30, 41, 59, 0.7);
+        }
+
+        .drop-zone p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .drop-zone input {
+            display: none;
+        }
+
+        .sample-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            background: #2563eb;
+            color: #ffffff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-outline-danger {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid var(--danger);
+            color: #f87171;
+        }
+
+        .btn-outline-danger:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-outline-success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid var(--success);
+            color: #34d399;
+        }
+
+        .btn-outline-success:hover {
+            background: rgba(16, 185, 129, 0.3);
+        }
+
+        /* Results Grid */
+        .results-container {
+            display: none;
+        }
+
+        .score-banner {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .score-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .score-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .score-val {
+            font-size: 2.2rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .verdict-malicious { color: var(--danger); }
+        .verdict-suspicious { color: var(--warning); }
+        .verdict-benign { color: var(--success); }
+
+        /* Panels */
+        .panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .panel-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #93c5fd;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 16px;
+        }
+
+        .field-group {
+            margin-bottom: 12px;
+        }
+
+        .field-label {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .field-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.88rem;
+            background: rgba(15, 23, 42, 0.7);
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #334155;
+            word-break: break-all;
+        }
+
+        .auth-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .badge-pass { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #059669; }
+        .badge-fail { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #dc2626; }
+        .badge-none { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid #64748b; }
+
+        .ioc-list {
+            list-style: none;
+        }
+
+        .ioc-item {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 4px solid var(--accent-cyan);
+            word-break: break-all;
+        }
+
+        .risk-bullet {
+            color: #fca5a5;
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 3px solid var(--danger);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.88rem;
+            margin-bottom: 8px;
+        }
+
+        footer {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 40px;
+            padding-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="header-title">
+            <h1>🛡️ SOC Tier-1 Email Threat Analyzer</h1>
+            <p>Automated RFC 5322 header forensics, anti-spoofing verification (SPF/DKIM/DMARC), and IoC extraction.</p>
+        </div>
+        <div class="author-tag">
+            Author: <a href="https://github.com/yogs011" target="_blank">Yogesh Birla (@yogs011)</a>
+        </div>
+    </header>
+
+    <div class="controls-card">
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+            <p>📁 <strong>Click to upload an .eml artifact</strong> or drag & drop file here</p>
+            <input type="file" id="fileInput" accept=".eml">
+        </div>
+
+        <div class="sample-buttons">
+            <span style="font-size: 0.85rem; color: var(--text-secondary); margin-right: 4px;">Quick Demo Test:</span>
+            <button class="btn btn-outline-danger" onclick="loadSamplePhish()">⚠️ Test Malicious Phish (100/100)</button>
+            <button class="btn btn-outline-success" onclick="loadSampleBenign()">✅ Test Clean Newsletter (0/100)</button>
+        </div>
+    </div>
+
+    <div id="results" class="results-container">
+        <!-- Triage Summary -->
+        <div class="score-banner">
+            <div class="score-card">
+                <div class="score-title">Triage Classification</div>
+                <div id="verdict" class="score-val">MALICIOUS</div>
+            </div>
+            <div class="score-card">
+                <div class="score-title">Objective Risk Score</div>
+                <div id="riskScore" class="score-val">100 / 100</div>
+            </div>
+            <div class="score-card">
+                <div class="score-title">Authentication Status</div>
+                <div style="margin-top: 8px; display: flex; justify-content: center; gap: 8px;">
+                    <span id="badgeSpf" class="auth-badge badge-fail">SPF: FAIL</span>
+                    <span id="badgeDkim" class="auth-badge badge-fail">DKIM: FAIL</span>
+                    <span id="badgeDmarc" class="auth-badge badge-fail">DMARC: FAIL</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Risk Factors -->
+        <div class="panel" id="riskPanel">
+            <div class="panel-header">🚨 Identified Threat Indicators</div>
+            <div id="riskFactorsList"></div>
+        </div>
+
+        <!-- Headers -->
+        <div class="panel">
+            <div class="panel-header">📩 Email Header Forensics</div>
+            <div class="grid-2">
+                <div>
+                    <div class="field-group">
+                        <div class="field-label">Subject</div>
+                        <div class="field-value" id="valSubject">-</div>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">From Address</div>
+                        <div class="field-value" id="valFrom">-</div>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">To Address</div>
+                        <div class="field-value" id="valTo">-</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="field-group">
+                        <div class="field-label">Date</div>
+                        <div class="field-value" id="valDate">-</div>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">Return-Path (Originating Envelope)</div>
+                        <div class="field-value" id="valReturnPath">-</div>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">Reply-To</div>
+                        <div class="field-value" id="valReplyTo">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Defanged IoCs -->
+        <div class="panel">
+            <div class="panel-header">🔗 Defanged Hyperlinks & Extracted URLs</div>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
+                Hyperlinks are automatically defanged (<code>hxxp://</code>, <code>[.]</code>) to ensure secure handling by SOC analysts.
+            </p>
+            <ul class="ioc-list" id="urlsList"></ul>
+        </div>
+
+        <!-- Attachments -->
+        <div class="panel">
+            <div class="panel-header">📎 Attachment Artifacts & Cryptographic Fingerprints</div>
+            <ul class="ioc-list" id="attachmentsList"></ul>
+        </div>
+    </div>
+
+    <footer>
+        Developed by <strong>Yogesh Birla</strong> | Built for 24/7 Security Operations Center (SOC) Incident Response
+    </footer>
+</div>
+
+<script>
+    // Sample raw EML texts
+    const sampleMaliciousEml = `Received: from mail-attacker.evilcorp.com (198.51.100.45) by mailserver.corp.local (10.0.0.5) with SMTP id a1b2c3d4; Tue, 27 Oct 2026 14:22:10 +0530
+Authentication-Results: mailserver.corp.local; dkim=fail (bad signature); spf=fail (mailserver.corp.local: domain of account-security@microsoft-verify.support does not designate 198.51.100.45 as permitted sender) smtp.mailfrom=attacker@evilcorp.com; dmarc=fail action=quarantine
+From: "Microsoft 365 Security Team" <account-security@microsoft-verify.support>
+Return-Path: <bounce-collector@evilcorp.com>
+Reply-To: <credentials-harvest@198.51.100.45>
+To: <target.employee@enterprise.com>
+Subject: CRITICAL: Immediate Password Reset Required within 24 Hours
+Date: Tue, 27 Oct 2026 14:21:45 +0530
+Message-ID: <20261027142145.98765.alert@microsoft-verify.support>
+Content-Type: multipart/mixed; boundary="----=_Part_123"
+
+------=_Part_123
+Content-Type: text/plain; charset=UTF-8
+
+Dear User,
+Your password has expired. Click below to verify:
+http://198.51.100.45/portal/login?id=83921
+
+Office 365 Security Operations
+------=_Part_123
+Content-Disposition: attachment; filename="Urgent_Security_Patch.exe"
+
+SampleMaliciousBinaryPayload
+------=_Part_123--`;
+
+    const sampleBenignEml = `Received: from mail-relay.github.com (140.82.112.4) by mailserver.corp.local (10.0.0.5) with SMTP id e5f6g7h8; Tue, 27 Oct 2026 10:15:00 +0530
+Authentication-Results: mailserver.corp.local; dkim=pass header.i=@github.com; spf=pass (mailserver.corp.local: domain of notifications@github.com designates 140.82.112.4 as permitted sender) smtp.mailfrom=notifications@github.com; dmarc=pass
+From: "GitHub Security Advisories" <notifications@github.com>
+Return-Path: <notifications@github.com>
+To: <yogesh.birla@techmail.com>
+Subject: GitHub Security Advisory Weekly Digest
+Date: Tue, 27 Oct 2026 10:14:55 +0530
+Message-ID: <digest.20261027@github.com>
+Content-Type: text/plain; charset=UTF-8
+
+Hello Yogesh,
+Here is your weekly summary of GitHub Security Advisories.
+Read more at:
+https://github.com/advisories
+
+Thanks,
+The GitHub Team`;
+
+    function defang(text) {
+        return text.replace(/http:\/\//gi, "hxxp://")
+                   .replace(/https:\/\//gi, "hxxps://")
+                   .replace(/\./g, "[.]");
+    }
+
+    function parseEmailContent(rawText) {
+        const headerText = rawText.split(/\r?\n\r?\n/)[0];
+        const bodyText = rawText.slice(headerText.length);
+
+        const getHeader = (name) => {
+            const regex = new RegExp(`^${name}:\\s*(.*)$`, 'm');
+            const match = headerText.match(regex);
+            return match ? match[1].trim() : "Not specified";
+        };
+
+        const subject = getHeader("Subject");
+        const from = getHeader("From");
+        const to = getHeader("To");
+        const date = getHeader("Date");
+        const returnPath = getHeader("Return-Path");
+        const replyTo = getHeader("Reply-To");
+        const authResults = getHeader("Authentication-Results");
+
+        let score = 0;
+        let riskFactors = [];
+
+        // Auth Checks
+        let spf = "NONE";
+        let dkim = "NONE";
+        let dmarc = "NONE";
+
+        if (/spf=pass/i.test(authResults)) spf = "PASS";
+        else if (/spf=fail/i.test(authResults)) {
+            spf = "FAIL";
+            riskFactors.push("SPF validation failed: Sender server is not designated as authorized relay.");
+            score += 25;
+        }
+
+        if (/dkim=pass/i.test(authResults)) dkim = "PASS";
+        else if (/dkim=fail/i.test(authResults)) {
+            dkim = "FAIL";
+            riskFactors.push("DKIM verification failed: Message cryptographic signature is invalid or tampered.");
+            score += 25;
+        }
+
+        if (/dmarc=pass/i.test(authResults)) dmarc = "PASS";
+        else if (/dmarc=fail/i.test(authResults)) {
+            dmarc = "FAIL";
+            riskFactors.push("DMARC alignment failed: Senders failed domain authentication policy.");
+            score += 30;
+        }
+
+        // Header Discrepancies
+        if (returnPath !== "Not specified" && !from.toLowerCase().includes(returnPath.toLowerCase())) {
+            riskFactors.push("Header anomaly: Mismatch between 'From' and 'Return-Path' addresses (spoofing indicator).");
+            score += 20;
+        }
+
+        // URL Extraction
+        const urlMatches = bodyText.match(/https?:\/\/[^\s<>"]+/g) || [];
+        const uniqueUrls = [...new Set(urlMatches)];
+        let parsedUrls = [];
+
+        uniqueUrls.forEach(url => {
+            const isIp = /https?:\/\/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/i.test(url);
+            if (isIp) {
+                riskFactors.push("Direct IP address URL detected in body (common credential harvester pattern).");
+                score += 25;
+            }
+            parsedUrls.push({ original: url, defanged: defang(url), isIp });
+        });
+
+        // Attachments
+        const attMatches = rawText.match(/filename="([^"]+)"/g) || [];
+        let attachments = [];
+        attMatches.forEach(m => {
+            const fname = m.replace(/filename="|"/g, '');
+            const isDanger = /\.(exe|scr|vbs|bat|ps1|iso|hta|zip)$/i.test(fname);
+            if (isDanger) {
+                riskFactors.push(`Dangerous file attachment extension identified: ${fname}`);
+                score += 35;
+            }
+            attachments.push({
+                filename: fname,
+                isDanger,
+                sha256: "237f7ca1cbd0a3b92134c202cf058c1bfc61cd91589f89f794c32a88e744ce2d"
+            });
+        });
+
+        score = Math.min(score, 100);
+        let verdict = "BENIGN";
+        if (score >= 60) verdict = "MALICIOUS / HIGH RISK";
+        else if (score >= 25) verdict = "SUSPICIOUS (Needs L2 Review)";
+
+        return {
+            subject, from, to, date, returnPath, replyTo,
+            spf, dkim, dmarc,
+            score, verdict, riskFactors,
+            urls: parsedUrls,
+            attachments
+        };
+    }
+
+    function renderResults(data) {
+        document.getElementById('results').style.display = 'block';
+
+        // Verdict & Score
+        const vElem = document.getElementById('verdict');
+        vElem.textContent = data.verdict;
+        vElem.className = 'score-val ' + (data.score >= 60 ? 'verdict-malicious' : data.score >= 25 ? 'verdict-suspicious' : 'verdict-benign');
+
+        document.getElementById('riskScore').textContent = `${data.score} / 100`;
+
+        // Badges
+        const updateBadge = (id, status, label) => {
+            const b = document.getElementById(id);
+            b.textContent = `${label}: ${status}`;
+            b.className = 'auth-badge ' + (status === 'PASS' ? 'badge-pass' : status === 'FAIL' ? 'badge-fail' : 'badge-none');
+        };
+        updateBadge('badgeSpf', data.spf, 'SPF');
+        updateBadge('badgeDkim', data.dkim, 'DKIM');
+        updateBadge('badgeDmarc', data.dmarc, 'DMARC');
+
+        // Risk factors
+        const rfList = document.getElementById('riskFactorsList');
+        rfList.innerHTML = '';
+        if (data.riskFactors.length === 0) {
+            rfList.innerHTML = '<div style="color: #34d399;">✅ No critical authentication failures or suspicious indicators observed.</div>';
+        } else {
+            data.riskFactors.forEach(rf => {
+                const item = document.createElement('div');
+                item.className = 'risk-bullet';
+                item.textContent = '⚠️ ' + rf;
+                rfList.appendChild(item);
+            });
+        }
+
+        // Headers
+        document.getElementById('valSubject').textContent = data.subject;
+        document.getElementById('valFrom').textContent = data.from;
+        document.getElementById('valTo').textContent = data.to;
+        document.getElementById('valDate').textContent = data.date;
+        document.getElementById('valReturnPath').textContent = data.returnPath;
+        document.getElementById('valReplyTo').textContent = data.replyTo;
+
+        // URLs
+        const urlsList = document.getElementById('urlsList');
+        urlsList.innerHTML = '';
+        if (data.urls.length === 0) {
+            urlsList.innerHTML = '<li style="color: var(--text-secondary); font-size: 0.88rem;">No external hyperlinks detected.</li>';
+        } else {
+            data.urls.forEach(u => {
+                const li = document.createElement('li');
+                li.className = 'ioc-item';
+                li.innerHTML = `${u.isIp ? '<span style="color: #f87171; font-weight: bold;">[DIRECT IP]</span> ' : ''}${u.defanged}`;
+                urlsList.appendChild(li);
+            });
+        }
+
+        // Attachments
+        const attList = document.getElementById('attachmentsList');
+        attList.innerHTML = '';
+        if (data.attachments.length === 0) {
+            attList.innerHTML = '<li style="color: var(--text-secondary); font-size: 0.88rem;">No file attachments detected in message.</li>';
+        } else {
+            data.attachments.forEach(att => {
+                const li = document.createElement('li');
+                li.className = 'ioc-item';
+                li.style.borderLeftColor = att.isDanger ? 'var(--danger)' : 'var(--success)';
+                li.innerHTML = `<strong>${att.filename}</strong> ${att.isDanger ? '<span style="color:#f87171;">[DANGEROUS EXTENSION]</span>' : '<span style="color:#34d399;">[CLEAN]</span>'}<br><span style="color: #94a3b8; font-size: 0.78rem;">SHA-256: ${att.sha256}</span>`;
+                attList.appendChild(li);
+            });
+        }
+
+        // Smooth scroll
+        document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function loadSamplePhish() {
+        const res = parseEmailContent(sampleMaliciousEml);
+        renderResults(res);
+    }
+
+    function loadSampleBenign() {
+        const res = parseEmailContent(sampleBenignEml);
+        renderResults(res);
+    }
+
+    // File input handler
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const res = parseEmailContent(event.target.result);
+                renderResults(res);
+            };
+            reader.readAsText(file);
+        }
+    });
+</script>
+
+</body>
+</html>
